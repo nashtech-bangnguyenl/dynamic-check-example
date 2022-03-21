@@ -12,14 +12,16 @@ public class FilterService {
         this.filterMap.put(filter.getType(), filter);
     }
 
-    public boolean validate(FilterAware filterAware) throws NoSuchFieldException, IllegalAccessException {
+    public Set<ValidationConstrain> validate(FilterAware filterAware) throws NoSuchFieldException, IllegalAccessException {
+        Set<ValidationConstrain> validationConstrainSet = new HashSet<>();
         final String type = filterAware.getType();
         final Filter filter = this.filterMap.get(type);
-        boolean check = true;
         for (Criteria criteria : filter.getCriterias()) {
-            check = check && isValid(criteria, filterAware);
+            if (!isValid(criteria, filterAware)) {
+                validationConstrainSet.add(new ValidationConstrain(criteria.getProperty(), criteria.getMessage()));
+            }
         }
-        return check;
+        return validationConstrainSet;
     }
 
     private boolean isValid(Criteria criteria, FilterAware filterAware) throws NoSuchFieldException, IllegalAccessException {
